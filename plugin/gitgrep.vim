@@ -67,7 +67,8 @@ function GitGrep(flags, pattern)
   endif
 
   " user selection
-  let l:selected_line = GG_InteractiveMenu(l:options, l:cmd, l:pattern)
+  let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
+  let l:selected_line = GG_InteractiveMenu(l:options, l:prompt, l:pattern)
   if empty(l:selected_line)
     return
   endif
