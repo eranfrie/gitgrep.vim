@@ -2,7 +2,7 @@
 
 An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command across a git repository and navigate between the results.
 
-<img src="images/sample.png" width="60%" />
+<img src="images/sample.png" width="75%" />
 
 ## Pros
 
@@ -37,8 +37,8 @@ Install using your favorite package manager, e.g., [Vundle](https://github.com/V
 
 Keys are not automatically mapped. You can choose your own mappings, for example:
 
-        nnoremap <leader>g :call GitGrep("<cword>")<CR>
+        nnoremap <leader>g :call GitGrep("-w", expand("<cword>"))<CR>
         nnoremap <leader>t :call GitGrep_PrevLocation()<CR>
-        command! -bang -nargs=* GG call GitGrep("", <q-args>)
-        command! -bang -nargs=* GGw call GitGrep("-w", <q-args>)
-        command! -bang -nargs=* GGi call GitGrep("-i", <q-args>)
+        command! -bang -nargs=* GG call GitGrep("", expand(<q-args>))
+        command! -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
+        command! -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))

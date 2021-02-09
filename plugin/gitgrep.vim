@@ -1,6 +1,6 @@
 " File: gitgrep.vim - script to git grep a pattern across a git repository
 " Author: Eran Friedman
-" Version: 1.1
+" Version: 1.2
 
 function GG_CloseBuffer(bufnr)
    wincmd p
@@ -16,7 +16,7 @@ function GG_InteractiveMenu(input, prompt, pattern) abort
   highlight filename_group ctermfg=blue
   highlight pattern_group ctermfg=red
   match filename_group /^.*:\d\+:/
-  call matchadd("pattern_group", a:pattern)
+  call matchadd("pattern_group", a:pattern[1:-2]) " remove shellescape from pattern
 
   let l:cur_buf = bufnr('%')
   call setline(1, a:input)
@@ -52,7 +52,7 @@ endfunction
 
 " Git grepping for pattern
 function GitGrep(flags, pattern)
-  let l:pattern = expand(a:pattern)
+  let l:pattern = shellescape(a:pattern)
   let l:cmd = "git grep -n " . a:flags . " " . l:pattern
   let l:options = systemlist(l:cmd)
 
