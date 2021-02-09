@@ -1,12 +1,12 @@
 # gitgrep.vim
 
-An easy way to issue a `git grep` command across a git repository and navigate between the results.
+An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command across a git repository and navigate between the results.
 
 <img src="images/sample.png" width="60%" />
 
 ## Pros
 
-- Alternative (or addition) to `ctags` and `cscopse`.
+- Alternative (or addition) to *ctags* and *cscopse*.
 - No need to refresh index.
 - No dependencies.
 - Cross language.
@@ -27,7 +27,10 @@ Install using your favorite package manager, e.g., [Vundle](https://github.com/V
 
 ## Commands:
 
-- `GitGrep(pattern)` - issue a `git grep` command and open the selection menu.
+- `GitGrep(flags, pattern)` - issue a *git grep* command and open the selection menu,
+  where *flags* are [git grep](https://git-scm.com/docs/git-grep) flags (can be empty string)
+  and *pattern* is the pattern to look for.
+
 - `GitGrep_PrevLocation()` - jump back to previous location.
 
 ## Mappings:
@@ -36,3 +39,6 @@ Keys are not automatically mapped. You can choose your own mappings, for example
 
         nnoremap <leader>g :call GitGrep("<cword>")<CR>
         nnoremap <leader>t :call GitGrep_PrevLocation()<CR>
+        command! -bang -nargs=* GG call GitGrep("", <q-args>)
+        command! -bang -nargs=* GGw call GitGrep("-w", <q-args>)
+        command! -bang -nargs=* GGi call GitGrep("-i", <q-args>)

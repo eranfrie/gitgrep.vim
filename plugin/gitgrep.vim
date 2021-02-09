@@ -1,6 +1,6 @@
 " File: gitgrep.vim - script to git grep a pattern across a git repository
 " Author: Eran Friedman
-" Version: 1.0
+" Version: 1.1
 
 function GG_CloseBuffer(bufnr)
    wincmd p
@@ -51,9 +51,9 @@ function GG_InteractiveMenu(input, prompt, pattern) abort
 endfunction
 
 " Git grepping for pattern
-function GitGrep(pattern)
+function GitGrep(flags, pattern)
   let l:pattern = expand(a:pattern)
-  let l:cmd = "git grep -nw " . l:pattern
+  let l:cmd = "git grep -n " . a:flags . " " . l:pattern
   let l:options = systemlist(l:cmd)
 
   if v:shell_error == 1
