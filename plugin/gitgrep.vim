@@ -11,7 +11,7 @@ endfunction
 
 function GG_InteractiveMenu(input, prompt, pattern) abort
   bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
-    \ nobuflisted\ number\ norelativenumber\ noswapfile\ nowrap\ cursorline
+    \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ nowrap\ cursorline
 
   highlight filename_group ctermfg=blue
   highlight pattern_group ctermfg=red
