@@ -1,8 +1,6 @@
 " File: gitgrep.vim - script to git grep a pattern across a git repository
 " Author: Eran Friedman
 
-let g:gitgrep_menu_height = 15
-
 function GG_CloseBuffer(bufnr)
    wincmd p
    execute "bwipe" a:bufnr
@@ -14,14 +12,19 @@ function GG_InteractiveMenu(input, prompt, pattern) abort
   bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
     \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ nowrap\ cursorline
 
-  highlight filename_group ctermfg=blue
-  highlight pattern_group ctermfg=red
+  " settings
+  let l:gitgrep_menu_height = get(g:, 'gitgrep_menu_height', 15)
+  let l:gitgrep_file_color = get(g:, 'gitgrep_file_color', "blue")
+  let l:gitgrep_pattern_color = get(g:, 'gitgrep_pattern_color', "red")
+
+  exe 'highlight filename_group ctermfg=' . l:gitgrep_file_color
+  exe 'highlight pattern_group ctermfg=' . l:gitgrep_pattern_color
   match filename_group /^.*:\d\+:/
   call matchadd("pattern_group", a:pattern[1:-2]) " remove shellescape from pattern
 
   let l:cur_buf = bufnr('%')
   call setline(1, a:input)
-  exe "res " . g:gitgrep_menu_height
+  exe "res " . l:gitgrep_menu_height
   redraw
   echo a:prompt
 
@@ -47,11 +50,11 @@ function GG_InteractiveMenu(input, prompt, pattern) abort
     elseif ch == "\<Down>"
       norm j
     elseif ch == "\<PageUp>"
-      for i in range(1, g:gitgrep_menu_height)
+      for i in range(1, l:gitgrep_menu_height)
         norm k
       endfor
     elseif ch == "\<PageDown>"
-      for i in range(1, g:gitgrep_menu_height)
+      for i in range(1, l:gitgrep_menu_height)
         norm j
       endfor
     endif

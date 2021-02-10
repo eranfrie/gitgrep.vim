@@ -33,6 +33,20 @@ Install using your favorite package manager, e.g., [Vundle](https://github.com/V
 
 - `GitGrepBack()` - jump back to previous location.
 
+## Customizations:
+
+- Set the height (number of lines) of the selection menu
+
+        let g:gitgrep_menu_height = 15
+
+- Set the color of the file path
+
+        let g:gitgrep_file_color = "blue"
+
+- Set the color of the matched pattern
+
+        let g:gitgrep_pattern_color = "red"
+
 ## Mappings:
 
 Keys are not automatically mapped. You can choose your own mappings, for example:
