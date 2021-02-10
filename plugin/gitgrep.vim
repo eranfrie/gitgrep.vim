@@ -97,7 +97,7 @@ function GitGrep(flags, pattern)
 endfunction
 
 " Jump back to previous location
-function GitGrep_PrevLocation()
+function GitGrepBack()
   try
     execute 'edit +' . s:prev_line_no s:prev_file
   catch

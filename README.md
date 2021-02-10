@@ -31,14 +31,14 @@ Install using your favorite package manager, e.g., [Vundle](https://github.com/V
   where *flags* are [git grep](https://git-scm.com/docs/git-grep) flags (can be empty string)
   and *pattern* is the pattern to look for.
 
-- `GitGrep_PrevLocation()` - jump back to previous location.
+- `GitGrepBack()` - jump back to previous location.
 
 ## Mappings:
 
 Keys are not automatically mapped. You can choose your own mappings, for example:
 
         nnoremap <leader>g :call GitGrep("-w", expand("<cword>"))<CR>
-        nnoremap <leader>t :call GitGrep_PrevLocation()<CR>
+        nnoremap <leader>t :call GitGrepBack()<CR>
         command! -bang -nargs=* GG call GitGrep("", expand(<q-args>))
         command! -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
         command! -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))
