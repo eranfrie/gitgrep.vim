@@ -39,6 +39,6 @@ Keys are not automatically mapped. You can choose your own mappings, for example
 
         nnoremap <leader>g :call GitGrep("-w", expand("<cword>"))<CR>
         nnoremap <leader>t :call GitGrepBack()<CR>
-        command! -bang -nargs=* GG call GitGrep("", expand(<q-args>))
-        command! -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
-        command! -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))
+        command -bang -nargs=* GG call GitGrep("", expand(<q-args>))
+        command -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
+        command -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))
