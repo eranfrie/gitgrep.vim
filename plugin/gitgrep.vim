@@ -1,6 +1,7 @@
 " File: gitgrep.vim - script to git grep a pattern across a git repository
 " Author: Eran Friedman
-" Version: 1.2
+
+let g:gitgrep_menu_height = 15
 
 function GG_CloseBuffer(bufnr)
    wincmd p
@@ -20,6 +21,7 @@ function GG_InteractiveMenu(input, prompt, pattern) abort
 
   let l:cur_buf = bufnr('%')
   call setline(1, a:input)
+  exe "res " . g:gitgrep_menu_height
   redraw
   echo a:prompt
 
@@ -40,10 +42,18 @@ function GG_InteractiveMenu(input, prompt, pattern) abort
       norm k
     elseif ch ==# 0x6A " j
       norm j
-    elseif ch == "\<Up>" " Up arrow
+    elseif ch == "\<Up>"
       norm k
-    elseif ch == "\<Down>" " Down arrow
+    elseif ch == "\<Down>"
       norm j
+    elseif ch == "\<PageUp>"
+      for i in range(1, g:gitgrep_menu_height)
+        norm k
+      endfor
+    elseif ch == "\<PageDown>"
+      for i in range(1, g:gitgrep_menu_height)
+        norm j
+      endfor
     endif
 
     redraw

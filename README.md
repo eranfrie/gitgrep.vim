@@ -21,7 +21,7 @@ Install using your favorite package manager, e.g., [Vundle](https://github.com/V
 
 ## Selection Menu:
 
-- `j` / `k` to scroll down / up.
+- `j` / `k` / `Down` / `Up` / `PageDown` / `PageUp` to navigate the menu.
 - `Enter` to select a result and jump to it.
 - `Esc` / `Ctrl-C` to cancel.
 
