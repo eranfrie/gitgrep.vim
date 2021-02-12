@@ -1,6 +1,10 @@
 " File: gitgrep.vim - script to git grep a pattern across a git repository
 " Author: Eran Friedman
 
+
+let s:prev_locations = []
+
+
 function GG_CloseBuffer(bufnr)
    wincmd p
    execute "bwipe" a:bufnr
@@ -95,8 +99,7 @@ function GitGrep(flags, pattern)
   let l:line_no = l:splitted_line[1]
 
   " store previous location to allow jumping back
-  let s:prev_file = expand('%:p')
-  let s:prev_line_no = line(".")
+  call add(s:prev_locations, [line("."), expand('%:p')])
 
   " jump to selection
   execute 'edit +' . l:line_no l:filename
@@ -104,9 +107,11 @@ endfunction
 
 " Jump back to previous location
 function GitGrepBack()
-  try
-    execute 'edit +' . s:prev_line_no s:prev_file
-  catch
+  if empty(s:prev_locations)
     echo "No previous location"
-  endtry
+    return
+  endif
+
+  let l:prev_loc = remove(s:prev_locations, -1)
+  execute 'edit +' . l:prev_loc[0] l:prev_loc[1]
 endfunction
