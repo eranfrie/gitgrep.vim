@@ -65,8 +65,11 @@ endfunction
 
 " Git grepping for pattern
 function GitGrep(flags, pattern)
+  " settings
+  let l:gitgrep_cmd = get(g:, 'gitgrep_cmd', 'git grep')
+
   let l:pattern = shellescape(a:pattern)
-  let l:cmd = "git grep -n " . a:flags . " " . l:pattern
+  let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . l:pattern
   let l:options = systemlist(l:cmd)
 
   if v:shell_error == 1

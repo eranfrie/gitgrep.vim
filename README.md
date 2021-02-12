@@ -35,6 +35,10 @@ Install using your favorite package manager, e.g., [Vundle](https://github.com/V
 
 ## Customizations:
 
+- Change the default *git grep* command
+
+        let g:gitgrep_cmd = "grep -r"
+
 - Set the height (number of lines) of the selection menu
 
         let g:gitgrep_menu_height = 15
