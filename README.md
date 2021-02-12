@@ -39,6 +39,14 @@ Install using your favorite package manager, e.g., [Vundle](https://github.com/V
 
         let g:gitgrep_cmd = "grep -r"
 
+- Exclude files using vim's regex
+
+        let g:gitgrep_exclude_files = "<regex>"
+
+  E.g., exclude files stsarting witth `test` or containing `simulation`
+
+        let g:gitgrep_exclude_files = "^test\\|simulation"
+
 - Set the height (number of lines) of the selection menu
 
         let g:gitgrep_menu_height = 15

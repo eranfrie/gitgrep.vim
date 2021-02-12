@@ -71,6 +71,7 @@ endfunction
 function GitGrep(flags, pattern)
   " settings
   let l:gitgrep_cmd = get(g:, 'gitgrep_cmd', 'git grep')
+  let l:gitgrep_exclude_files = get(g:, 'gitgrep_exclude_files', '')
 
   let l:pattern = shellescape(a:pattern)
   let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . l:pattern
@@ -84,6 +85,24 @@ function GitGrep(flags, pattern)
   if v:shell_error != 0
       echo "Not a git repository"
       return
+  endif
+
+  " filter files
+  if !empty(l:gitgrep_exclude_files)
+    let l:filtered_options = []
+    for i in range(0, len(l:options) - 1)
+      let l:filename = split(l:options[i], ":")[0]
+      let result = matchstr(l:filename, l:gitgrep_exclude_files)
+      if empty(result)
+        call add(l:filtered_options, l:options[i])
+      endif
+    endfor
+    let l:options = l:filtered_options
+    " check if list is empty after filtering
+    if len(l:options) == 0
+      echo "No match found"
+      return
+    endif
   endif
 
   " user selection
