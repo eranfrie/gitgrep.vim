@@ -4,6 +4,12 @@
 " License:      This file is placed in the public domain.
 
 
+if exists("g:loaded_gitgrep")
+  finish
+endif
+let g:loaded_gitgrep = 1
+
+
 let s:save_cpo = &cpo
 set cpo&vim
 
@@ -17,6 +23,7 @@ function s:CloseBuffer(bufnr)
    redraw
    return ""
 endfunction
+
 
 function s:InteractiveMenu(input, prompt, pattern) abort
   bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
@@ -72,6 +79,7 @@ function s:InteractiveMenu(input, prompt, pattern) abort
     redraw
   endwhile
 endfunction
+
 
 " Git grepping for pattern
 function GitGrep(flags, pattern)
@@ -129,6 +137,7 @@ function GitGrep(flags, pattern)
   " jump to selection
   execute 'edit +' . l:line_no l:filename
 endfunction
+
 
 " Jump back to previous location
 function GitGrepBack()

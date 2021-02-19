@@ -62,6 +62,10 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 
         let g:gitgrep_pattern_color = "red"
 
+- Disable loading the plugin
+
+        let g:loaded_gitgrep = 1
+
 ## Mappings:
 
 Keys are not automatically mapped. You can choose your own mappings, for example:
