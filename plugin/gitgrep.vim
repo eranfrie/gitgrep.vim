@@ -1,5 +1,7 @@
-" File: gitgrep.vim - script to git grep a pattern across a git repository
-" Author: Eran Friedman
+" Vim global plugin for using git grep
+" Last Change:  2021 Feb 19
+" Maintainer:   Eran Friedman
+" License:      This file is placed in the public domain.
 
 
 let s:prev_locations = []
