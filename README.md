@@ -13,11 +13,14 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 
 ## Installation
 
-Install using your favorite package manager, e.g., [Vundle](https://github.com/VundleVim/Vundle.vim):
+- Install using your favorite package manager, e.g., [Vundle](https://github.com/VundleVim/Vundle.vim):
 
-1. Add the following to your .vimrc: `Plugin 'eranfrie/gitgrep.vim'`.
-2. Reload .vimrc.
-3. Run: `:PluginInstall`.
+    1. Add the following to your .vimrc: `Plugin 'eranfrie/gitgrep.vim'`.
+    2. Reload .vimrc.
+    3. Run: `:PluginInstall`.
+
+- Manual installation: copy `gitgrep.vim` to your plugin directory
+    (e.g., `~/.vim/plugin/` in Unix / Mac OS X).
 
 ## Selection Menu:
 
