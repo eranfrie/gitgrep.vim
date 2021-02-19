@@ -7,14 +7,14 @@
 let s:prev_locations = []
 
 
-function GG_CloseBuffer(bufnr)
+function s:CloseBuffer(bufnr)
    wincmd p
    execute "bwipe" a:bufnr
    redraw
    return ""
 endfunction
 
-function GG_InteractiveMenu(input, prompt, pattern) abort
+function s:InteractiveMenu(input, prompt, pattern) abort
   bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
     \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ nowrap\ cursorline
 
@@ -38,14 +38,14 @@ function GG_InteractiveMenu(input, prompt, pattern) abort
     try
       let ch = getchar()
     catch /^Vim:Interrupt$/ " CTRL-C
-      return GG_CloseBuffer(l:cur_buf)
+      return s:CloseBuffer(l:cur_buf)
     endtry
 
     if ch ==# 0x1B " ESC
-      return GG_CloseBuffer(l:cur_buf)
+      return s:CloseBuffer(l:cur_buf)
     elseif ch ==# 0x0D " Enter
       let l:result = getline('.')
-      call GG_CloseBuffer(l:cur_buf)
+      call s:CloseBuffer(l:cur_buf)
       return l:result
     elseif ch ==# 0x6B " k
       norm k
@@ -109,7 +109,7 @@ function GitGrep(flags, pattern)
 
   " user selection
   let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
-  let l:selected_line = GG_InteractiveMenu(l:options, l:prompt, l:pattern)
+  let l:selected_line = s:InteractiveMenu(l:options, l:prompt, l:pattern)
   if empty(l:selected_line)
     return
   endif
