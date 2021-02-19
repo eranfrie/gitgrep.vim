@@ -4,6 +4,10 @@
 " License:      This file is placed in the public domain.
 
 
+let s:save_cpo = &cpo
+set cpo&vim
+
+
 let s:prev_locations = []
 
 
@@ -136,3 +140,7 @@ function GitGrepBack()
   let l:prev_loc = remove(s:prev_locations, -1)
   execute 'edit +' . l:prev_loc[0] l:prev_loc[1]
 endfunction
+
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
