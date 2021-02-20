@@ -28,7 +28,7 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 - `Enter` to select a result and jump to it.
 - `Esc` / `Ctrl-C` to cancel.
 
-## Commands:
+## Functions:
 
 - `GitGrep(flags, pattern)` - issue a *git grep* command and open the selection menu,
   where *flags* are [git grep](https://git-scm.com/docs/git-grep) flags (can be empty string)
@@ -42,7 +42,7 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 
         let g:gitgrep_cmd = "grep -r"
 
-- Exclude files using vim's regex
+- Exclude files using Vim's regex
 
         let g:gitgrep_exclude_files = "<regex>"
 
