@@ -1,5 +1,5 @@
 " Vim global plugin for using git grep
-" Last Change:  2021 Feb 19
+" Last Change:  2021 Feb 24
 " Maintainer:   Eran Friedman
 " License:      This file is placed in the public domain.
 
@@ -81,11 +81,22 @@ function s:InteractiveMenu(input, prompt, pattern) abort
 endfunction
 
 
+" format of str is <file>:<line number>:...
+function s:ParseFileAndLineNo(str)
+  let l:splitted_line = split(a:str, ":")
+  let l:filename = l:splitted_line[0]
+  let l:full_filename = fnamemodify(l:filename, ':p')
+  let l:line_no = l:splitted_line[1]
+  return [l:full_filename, l:line_no]
+endfunction
+
+
 " Git grepping for pattern
 function GitGrep(flags, pattern)
   " settings
   let l:gitgrep_cmd = get(g:, 'gitgrep_cmd', 'git grep')
   let l:gitgrep_exclude_files = get(g:, 'gitgrep_exclude_files', '')
+  let l:gitgrep_auto_jump = get(g:, 'gitgrep_auto_jump', 0)
 
   let l:pattern = shellescape(a:pattern)
   let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . l:pattern
@@ -119,11 +130,35 @@ function GitGrep(flags, pattern)
     endif
   endif
 
+  let l:selected_line = ""
+  if l:gitgrep_auto_jump == 1
+    if len(l:options) == 1
+      let l:selected_line = l:options[0]
+      let l:file_and_line = s:ParseFileAndLineNo(l:selected_line)
+      if l:file_and_line[0] == expand('%:p') && l:file_and_line[1] == line(".")
+        echo "Already on single match"
+        return
+      endif
+    elseif len(l:options) == 2
+      let l:file_and_line = s:ParseFileAndLineNo(l:options[0])
+      if l:file_and_line[0] == expand('%:p') && l:file_and_line[1] == line(".")
+        let l:selected_line = l:options[1]
+      else
+        let l:file_and_line = s:ParseFileAndLineNo(l:options[1])
+        if l:file_and_line[0] == expand('%:p') && l:file_and_line[1] == line(".")
+          let l:selected_line = l:options[0]
+        endif
+      endif
+    endif
+  endif
+
   " user selection
-  let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
-  let l:selected_line = s:InteractiveMenu(l:options, l:prompt, l:pattern)
   if empty(l:selected_line)
-    return
+      let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
+      let l:selected_line = s:InteractiveMenu(l:options, l:prompt, l:pattern)
+      if empty(l:selected_line)
+        return
+      endif
   endif
 
   " process selection

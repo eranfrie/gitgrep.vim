@@ -42,6 +42,10 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 
         let g:gitgrep_cmd = "grep -r"
 
+- Jump automatically if there is one match or two matches (and cursor is already on one of those matches)
+
+        let g:gitgrep_auto_jump = 1
+
 - Exclude files using Vim's regex
 
         let g:gitgrep_exclude_files = "<regex>"
