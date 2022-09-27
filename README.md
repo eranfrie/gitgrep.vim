@@ -39,43 +39,45 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 ## Customizations:
 
 - Change the default *git grep* command
-
-        let g:gitgrep_cmd = "grep -r"
-
+```
+let g:gitgrep_cmd = "grep -r"
+```
 - Jump automatically if there is one match or two matches (and cursor is already on one of those matches)
-
-        let g:gitgrep_auto_jump = 1
-
+```
+let g:gitgrep_auto_jump = 1
+```
 - Exclude files using Vim's regex
-
-        let g:gitgrep_exclude_files = "<regex>"
-
+```
+let g:gitgrep_exclude_files = "<regex>"
+```
   E.g., exclude files stsarting witth `test` or containing `simulation`
-
-        let g:gitgrep_exclude_files = "^test\\|simulation"
-
+```
+let g:gitgrep_exclude_files = "^test\\|simulation"
+```
 - Set the height (number of lines) of the selection menu
-
-        let g:gitgrep_menu_height = 15
-
+```
+let g:gitgrep_menu_height = 15
+```
 - Set the color of the file path
-
-        let g:gitgrep_file_color = "blue"
-
+```
+let g:gitgrep_file_color = "blue"
+```
 - Set the color of the matched pattern
-
-        let g:gitgrep_pattern_color = "red"
-
+```
+let g:gitgrep_pattern_color = "red"
+```
 - Disable loading the plugin
-
-        let g:loaded_gitgrep = 1
+```
+let g:loaded_gitgrep = 1
+```
 
 ## Mappings:
 
 Keys are not automatically mapped. You can choose your own mappings, for example:
-
-        nnoremap <leader>g :call GitGrep("-w", expand("<cword>"))<CR>
-        nnoremap <leader>t :call GitGrepBack()<CR>
-        command -bang -nargs=* GG call GitGrep("", expand(<q-args>))
-        command -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
-        command -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))
+```
+nnoremap <leader>g :call GitGrep("-w", expand("<cword>"))<CR>
+nnoremap <leader>t :call GitGrepBack()<CR>
+command -bang -nargs=* GG call GitGrep("", expand(<q-args>))
+command -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
+command -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))
+```
