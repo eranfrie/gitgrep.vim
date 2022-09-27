@@ -1,5 +1,5 @@
 " Vim global plugin for using git grep
-" Last Change:  2021 Feb 24
+" Last Change:  2022 Sep 27
 " Maintainer:   Eran Friedman
 " License:      This file is placed in the public domain.
 
@@ -18,10 +18,10 @@ let s:prev_locations = []
 
 
 function s:CloseBuffer(bufnr)
-   wincmd p
-   execute "bwipe" a:bufnr
-   redraw
-   return ""
+  wincmd p
+  execute "bwipe" a:bufnr
+  redraw
+  return ""
 endfunction
 
 
@@ -103,13 +103,13 @@ function GitGrep(flags, pattern)
   let l:options = systemlist(l:cmd)
 
   if v:shell_error == 1
-      echo "No match found"
-      return
+    echo "No match found"
+    return
   endif
 
   if v:shell_error != 0
-      echo "Not a git repository"
-      return
+    echo "Not a git repository"
+    return
   endif
 
   " filter files
@@ -154,11 +154,11 @@ function GitGrep(flags, pattern)
 
   " user selection
   if empty(l:selected_line)
-      let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
-      let l:selected_line = s:InteractiveMenu(l:options, l:prompt, l:pattern)
-      if empty(l:selected_line)
-        return
-      endif
+    let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
+    let l:selected_line = s:InteractiveMenu(l:options, l:prompt, l:pattern)
+    if empty(l:selected_line)
+      return
+    endif
   endif
 
   " process selection
