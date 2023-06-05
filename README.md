@@ -73,11 +73,41 @@ let g:loaded_gitgrep = 1
 
 ## Mappings:
 
-Keys are not automatically mapped. You can choose your own mappings, for example:
+Keys are not mapped automatically. You can choose your own mapping,
+
+Some recommendations:
+
+Easily gitgrep for the word under cursor and jump back:
 ```
 nnoremap <leader>g :call GitGrep("-w", expand("<cword>"))<CR>
 nnoremap <leader>t :call GitGrepBack()<CR>
+```
+
+Create mapping with common grep flags:
+```
 command -bang -nargs=* GG call GitGrep("", expand(<q-args>))
 command -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
 command -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))
+```
+
+### Examples:
+
+Most basic usage - find all instances of "test":
+```
+:GG test
+```
+
+To use special characters such as space, escape the pattern:
+```
+:GG "def test"
+```
+
+Regex:
+```
+:GG def.*test
+```
+
+Additional grepping (can be used to filter files):
+```
+:GG def | grep test.py
 ```

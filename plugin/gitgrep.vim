@@ -1,5 +1,5 @@
 " Vim global plugin for using git grep
-" Last Change:  2022 Sep 27
+" Last Change:  2023 Jun 05
 " Maintainer:   Eran Friedman
 " License:      This file is placed in the public domain.
 
@@ -98,8 +98,7 @@ function GitGrep(flags, pattern)
   let l:gitgrep_exclude_files = get(g:, 'gitgrep_exclude_files', '')
   let l:gitgrep_auto_jump = get(g:, 'gitgrep_auto_jump', 0)
 
-  let l:pattern = shellescape(a:pattern)
-  let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . l:pattern
+  let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . a:pattern
   let l:options = systemlist(l:cmd)
 
   if v:shell_error == 1
@@ -155,7 +154,7 @@ function GitGrep(flags, pattern)
   " user selection
   if empty(l:selected_line)
     let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
-    let l:selected_line = s:InteractiveMenu(l:options, l:prompt, l:pattern)
+    let l:selected_line = s:InteractiveMenu(l:options, l:prompt, a:pattern)
     if empty(l:selected_line)
       return
     endif
