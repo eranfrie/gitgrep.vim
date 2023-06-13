@@ -1,5 +1,5 @@
 " Vim global plugin for using git grep
-" Last Change:  2023 Jun 05
+" Last Change:  2023 Jun 13
 " Maintainer:   Eran Friedman
 " License:      This file is placed in the public domain.
 
@@ -27,7 +27,7 @@ endfunction
 
 function s:InteractiveMenu(input, prompt, pattern) abort
   bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
-    \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ nowrap\ cursorline
+    \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ wrap\ cursorline
 
   " settings
   let l:gitgrep_menu_height = get(g:, 'gitgrep_menu_height', 15)
