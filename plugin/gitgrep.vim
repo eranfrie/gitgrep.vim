@@ -1,5 +1,5 @@
 " Vim global plugin for using git grep
-" Last Change:  2023 Jun 13
+" Last Change:  2023 Jul 15
 " Maintainer:   Eran Friedman
 " License:      This file is placed in the public domain.
 
@@ -15,6 +15,10 @@ set cpo&vim
 
 
 let s:prev_locations = []
+
+" iterating matches
+let s:iter_matches = v:null
+let s:iter_index = 0
 
 
 function s:CloseBuffer(bufnr)
@@ -56,8 +60,9 @@ function s:InteractiveMenu(input, prompt, pattern) abort
       return s:CloseBuffer(l:cur_buf)
     elseif ch ==# 0x0D " Enter
       let l:result = getline('.')
+      let l:line_num = line('.')
       call s:CloseBuffer(l:cur_buf)
-      return l:result
+      return [l:result, l:line_num - 1]
     elseif ch ==# 0x6B " k
       norm k
     elseif ch ==# 0x6A " j
@@ -81,13 +86,50 @@ function s:InteractiveMenu(input, prompt, pattern) abort
 endfunction
 
 
-" format of str is <file>:<line number>:...
-function s:ParseFileAndLineNo(str)
-  let l:splitted_line = split(a:str, ":")
+" format of line is <file>:<line number>:...
+function s:ParseFileAndLineNo(line)
+  let l:splitted_line = split(a:line, ":")
   let l:filename = l:splitted_line[0]
-  let l:full_filename = fnamemodify(l:filename, ':p')
   let l:line_no = l:splitted_line[1]
-  return [l:full_filename, l:line_no]
+  return [l:filename, l:line_no]
+endfunction
+
+
+" iterate to the orevious match
+function GitGrepIterPrev()
+  if s:iter_matches is v:null
+    echo "No matches to iterate"
+    return
+  endif
+  if s:iter_index - 1 == -1
+    echo "This is the first match"
+    return
+  endif
+
+  let s:iter_index -= 1
+  let l:file_and_lineno = s:ParseFileAndLineNo(s:iter_matches[s:iter_index])
+  let l:filename = l:file_and_lineno[0]
+  let l:line_no = l:file_and_lineno[1]
+  execute 'edit +' . l:line_no l:filename
+endfunction
+
+
+" iterate to the next match
+function GitGrepIterNext()
+  if s:iter_matches is v:null
+    echo "No matches to iterate"
+    return
+  endif
+  if s:iter_index + 1 == len(s:iter_matches)
+    echo "This is the last match"
+    return
+  endif
+
+  let s:iter_index += 1
+  let l:file_and_lineno = s:ParseFileAndLineNo(s:iter_matches[s:iter_index])
+  let l:filename = l:file_and_lineno[0]
+  let l:line_no = l:file_and_lineno[1]
+  execute 'edit +' . l:line_no l:filename
 endfunction
 
 
@@ -134,17 +176,20 @@ function GitGrep(flags, pattern)
     if len(l:options) == 1
       let l:selected_line = l:options[0]
       let l:file_and_line = s:ParseFileAndLineNo(l:selected_line)
-      if l:file_and_line[0] == expand('%:p') && l:file_and_line[1] == line(".")
+      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
+      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
         echo "Already on single match"
         return
       endif
     elseif len(l:options) == 2
       let l:file_and_line = s:ParseFileAndLineNo(l:options[0])
-      if l:file_and_line[0] == expand('%:p') && l:file_and_line[1] == line(".")
+      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
+      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
         let l:selected_line = l:options[1]
       else
         let l:file_and_line = s:ParseFileAndLineNo(l:options[1])
-        if l:file_and_line[0] == expand('%:p') && l:file_and_line[1] == line(".")
+        let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
+        if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
           let l:selected_line = l:options[0]
         endif
       endif
@@ -154,19 +199,25 @@ function GitGrep(flags, pattern)
   " user selection
   if empty(l:selected_line)
     let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
-    let l:selected_line = s:InteractiveMenu(l:options, l:prompt, a:pattern)
-    if empty(l:selected_line)
+    let l:selected_line_and_index = s:InteractiveMenu(l:options, l:prompt, a:pattern)
+    if empty(l:selected_line_and_index)
       return
     endif
+    let l:selected_line = selected_line_and_index[0]
+    let l:line_num = selected_line_and_index[1]
   endif
+
+  " store information to allow iteration
+  let s:iter_matches = l:options
+  let s:iter_index = l:line_num
+
+  " store previous location to allow jumping back
+  call add(s:prev_locations, [line("."), expand('%:p')])
 
   " process selection
   let l:splitted_line = split(l:selected_line, ":")
   let l:filename = l:splitted_line[0]
   let l:line_no = l:splitted_line[1]
-
-  " store previous location to allow jumping back
-  call add(s:prev_locations, [line("."), expand('%:p')])
 
   " jump to selection
   execute 'edit +' . l:line_no l:filename

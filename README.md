@@ -36,6 +36,8 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 
 - `GitGrepBack()` - jump back to previous location.
 
+- `GitGrepIterPrev()` / `GitGrepIterNext()` - iterate to the previous/next match.
+
 ## Customizations:
 
 - Change the default *git grep* command
@@ -83,11 +85,17 @@ nnoremap <leader>g :call GitGrep("-w", expand("<cword>"))<CR>
 nnoremap <leader>t :call GitGrepBack()<CR>
 ```
 
-Create mapping with common grep flags:
+Create mappings with common grep flags:
 ```
 command -bang -nargs=* GG call GitGrep("", expand(<q-args>))
 command -bang -nargs=* GGw call GitGrep("-w", expand(<q-args>))
 command -bang -nargs=* GGi call GitGrep("-i", expand(<q-args>))
+```
+
+Create mappings to iterate to the previous and next matches:
+```
+nnoremap <leader>p :call GitGrepIterPrev()<CR>
+nnoremap <leader>n :call GitGrepIterNext()<CR>
 ```
 
 ### Examples:
