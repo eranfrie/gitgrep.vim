@@ -1,5 +1,5 @@
 " Vim global plugin for using git grep
-" Last Change:  2023 Jul 15
+" Last Change:  2023 Aug 11
 " Maintainer:   Eran Friedman
 " License:      This file is placed in the public domain.
 
@@ -186,11 +186,13 @@ function GitGrep(flags, pattern)
       let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
       if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
         let l:selected_line = l:options[1]
+        let l:line_num = 1
       else
         let l:file_and_line = s:ParseFileAndLineNo(l:options[1])
         let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
         if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
           let l:selected_line = l:options[0]
+          let l:line_num = 0
         endif
       endif
     endif
@@ -203,8 +205,8 @@ function GitGrep(flags, pattern)
     if empty(l:selected_line_and_index)
       return
     endif
-    let l:selected_line = selected_line_and_index[0]
-    let l:line_num = selected_line_and_index[1]
+    let l:selected_line = l:selected_line_and_index[0]
+    let l:line_num = l:selected_line_and_index[1]
   endif
 
   " store information to allow iteration
