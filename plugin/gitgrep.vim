@@ -175,6 +175,7 @@ function GitGrep(flags, pattern)
   if l:gitgrep_auto_jump == 1
     if len(l:options) == 1
       let l:selected_line = l:options[0]
+      let l:line_num = 0
       let l:file_and_line = s:ParseFileAndLineNo(l:selected_line)
       let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
       if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
