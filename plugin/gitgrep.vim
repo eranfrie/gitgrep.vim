@@ -21,6 +21,78 @@ let s:iter_matches = v:null
 let s:iter_index = 0
 
 
+" Execute the grep command.
+" Also contains the auto-jump logic.
+function s:Grep(flags, pattern)
+  " settings
+  let l:gitgrep_cmd = get(g:, 'gitgrep_cmd', 'git grep')
+  let l:gitgrep_exclude_files = get(g:, 'gitgrep_exclude_files', '')
+  let l:gitgrep_auto_jump = get(g:, 'gitgrep_auto_jump', 0)
+
+  let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . a:pattern
+  let l:options = systemlist(l:cmd)
+
+  if v:shell_error == 1
+    echo "No match found"
+    return [0, v:null]
+  endif
+
+  if v:shell_error != 0
+    echo "Not a git repository"
+    return [0, v:null]
+  endif
+
+  " filter files
+  if !empty(l:gitgrep_exclude_files)
+    let l:filtered_options = []
+    for i in range(0, len(l:options) - 1)
+      let l:filename = split(l:options[i], ":")[0]
+      let result = matchstr(l:filename, l:gitgrep_exclude_files)
+      if empty(result)
+        call add(l:filtered_options, l:options[i])
+      endif
+    endfor
+    let l:options = l:filtered_options
+    " check if list is empty after filtering
+    if len(l:options) == 0
+      echo "No match found"
+      return [0, v:null]
+    endif
+  endif
+
+  let l:selected_line = ""
+  let l:line_num = v:null
+  if l:gitgrep_auto_jump == 1
+    if len(l:options) == 1
+      let l:selected_line = l:options[0]
+      let l:line_num = 0
+      let l:file_and_line = s:ParseFileAndLineNo(l:selected_line)
+      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
+      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
+        echo "Already on single match"
+        return [0, v:null]
+      endif
+    elseif len(l:options) == 2
+      let l:file_and_line = s:ParseFileAndLineNo(l:options[0])
+      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
+      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
+        let l:selected_line = l:options[1]
+        let l:line_num = 1
+      else
+        let l:file_and_line = s:ParseFileAndLineNo(l:options[1])
+        let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
+        if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
+          let l:selected_line = l:options[0]
+          let l:line_num = 0
+        endif
+      endif
+    endif
+  endif
+  let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
+  return [1, [l:options, l:selected_line, l:line_num, l:prompt]]
+endfunction
+
+
 function s:CloseBuffer(bufnr)
   wincmd p
   execute "bwipe" a:bufnr
@@ -135,73 +207,18 @@ endfunction
 
 " Git grepping for pattern
 function GitGrep(flags, pattern)
-  " settings
-  let l:gitgrep_cmd = get(g:, 'gitgrep_cmd', 'git grep')
-  let l:gitgrep_exclude_files = get(g:, 'gitgrep_exclude_files', '')
-  let l:gitgrep_auto_jump = get(g:, 'gitgrep_auto_jump', 0)
-
-  let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . a:pattern
-  let l:options = systemlist(l:cmd)
-
-  if v:shell_error == 1
-    echo "No match found"
+  let l:res = s:Grep(a:flags, a:pattern)
+  if !l:res[0]
     return
   endif
 
-  if v:shell_error != 0
-    echo "Not a git repository"
-    return
-  endif
-
-  " filter files
-  if !empty(l:gitgrep_exclude_files)
-    let l:filtered_options = []
-    for i in range(0, len(l:options) - 1)
-      let l:filename = split(l:options[i], ":")[0]
-      let result = matchstr(l:filename, l:gitgrep_exclude_files)
-      if empty(result)
-        call add(l:filtered_options, l:options[i])
-      endif
-    endfor
-    let l:options = l:filtered_options
-    " check if list is empty after filtering
-    if len(l:options) == 0
-      echo "No match found"
-      return
-    endif
-  endif
-
-  let l:selected_line = ""
-  if l:gitgrep_auto_jump == 1
-    if len(l:options) == 1
-      let l:selected_line = l:options[0]
-      let l:line_num = 0
-      let l:file_and_line = s:ParseFileAndLineNo(l:selected_line)
-      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
-      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
-        echo "Already on single match"
-        return
-      endif
-    elseif len(l:options) == 2
-      let l:file_and_line = s:ParseFileAndLineNo(l:options[0])
-      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
-      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
-        let l:selected_line = l:options[1]
-        let l:line_num = 1
-      else
-        let l:file_and_line = s:ParseFileAndLineNo(l:options[1])
-        let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
-        if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
-          let l:selected_line = l:options[0]
-          let l:line_num = 0
-        endif
-      endif
-    endif
-  endif
+  let l:options = res[1][0]
+  let l:selected_line = res[1][1]
+  let l:line_num = res[1][2]
+  let l:prompt = res[1][3]
 
   " user selection
   if empty(l:selected_line)
-    let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
     let l:selected_line_and_index = s:InteractiveMenu(l:options, l:prompt, a:pattern)
     if empty(l:selected_line_and_index)
       return
