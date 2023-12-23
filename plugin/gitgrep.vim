@@ -60,7 +60,7 @@ function s:Grep(flags, pattern)
     endif
   endif
 
-  let l:selected_line = ""
+  let l:selected_line = v:null
   let l:line_num = v:null
   if l:gitgrep_auto_jump == 1
     if len(l:options) == 1
@@ -97,18 +97,31 @@ function s:CloseBuffer(bufnr)
   wincmd p
   execute "bwipe" a:bufnr
   redraw
-  return ""
 endfunction
 
 
-function s:InteractiveMenu(input, prompt, pattern) abort
-  bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
-    \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ wrap\ cursorline
-
+function s:InteractiveMenu(flags, pattern) abort
   " settings
   let l:gitgrep_menu_height = get(g:, 'gitgrep_menu_height', 15)
   let l:gitgrep_file_color = get(g:, 'gitgrep_file_color', "blue")
   let l:gitgrep_pattern_color = get(g:, 'gitgrep_pattern_color', "red")
+
+  let l:res = s:Grep(a:flags, a:pattern)
+  if l:res[0] == 0
+    return [0, v:null, v:null, v:null]
+  endif
+
+  let l:options = res[1][0]
+  let l:selected_line = res[1][1]
+  let l:line_num = res[1][2]
+  let l:prompt = res[1][3]
+
+  if l:selected_line != v:null
+    return [1, l:selected_line, l:line_num, l:options]
+  endif
+
+  bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
+    \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ wrap\ cursorline
 
   exe 'highlight filename_group ctermfg=' . l:gitgrep_file_color
   exe 'highlight pattern_group ctermfg=' . l:gitgrep_pattern_color
@@ -116,25 +129,27 @@ function s:InteractiveMenu(input, prompt, pattern) abort
   call matchadd("pattern_group", a:pattern[1:-2]) " remove shellescape from pattern
 
   let l:cur_buf = bufnr('%')
-  call setline(1, a:input)
+  call setline(1, l:options)
   exe "res " . l:gitgrep_menu_height
   redraw
-  echo a:prompt
+  echo l:prompt
 
   while 1
     try
       let ch = getchar()
     catch /^Vim:Interrupt$/ " CTRL-C
-      return s:CloseBuffer(l:cur_buf)
+      call s:CloseBuffer(l:cur_buf)
+      return [0, v:null, v:null, v:null]
     endtry
 
     if ch ==# 0x1B " ESC
-      return s:CloseBuffer(l:cur_buf)
+      call s:CloseBuffer(l:cur_buf)
+      return [0, v:null, v:null, v:null]
     elseif ch ==# 0x0D " Enter
       let l:result = getline('.')
       let l:line_num = line('.')
       call s:CloseBuffer(l:cur_buf)
-      return [l:result, l:line_num - 1]
+      return [1, l:result, l:line_num - 1, l:options]
     elseif ch ==# 0x6B " k
       norm k
     elseif ch ==# 0x6A " j
@@ -207,25 +222,14 @@ endfunction
 
 " Git grepping for pattern
 function GitGrep(flags, pattern)
-  let l:res = s:Grep(a:flags, a:pattern)
-  if !l:res[0]
+  let res = s:InteractiveMenu(a:flags, a:pattern)
+  if res[0] == 0 || res[1] == v:null
     return
   endif
 
-  let l:options = res[1][0]
-  let l:selected_line = res[1][1]
-  let l:line_num = res[1][2]
-  let l:prompt = res[1][3]
-
-  " user selection
-  if empty(l:selected_line)
-    let l:selected_line_and_index = s:InteractiveMenu(l:options, l:prompt, a:pattern)
-    if empty(l:selected_line_and_index)
-      return
-    endif
-    let l:selected_line = l:selected_line_and_index[0]
-    let l:line_num = l:selected_line_and_index[1]
-  endif
+  let l:selected_line = res[1]
+  let l:line_num = res[2]
+  let l:options = res[3]
 
   " store information to allow iteration
   let s:iter_matches = l:options
