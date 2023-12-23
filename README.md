@@ -24,9 +24,11 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 
 ## Selection Menu:
 
-- `j` / `k` / `Down` / `Up` / `PageDown` / `PageUp` to navigate the menu.
+- `Down` / `Up` / `PageDown` / `PageUp` to navigate the menu.
 - `Enter` to select a result and jump to it.
 - `Esc` / `Ctrl-C` to cancel.
+- `Backspace` to remove the last character from the pattern.
+- Any other key to add a character to the pattern.
 
 ## Functions:
 
@@ -43,10 +45,6 @@ An easy way to issue a [git grep](https://git-scm.com/docs/git-grep) command acr
 - Change the default *git grep* command
 ```
 let g:gitgrep_cmd = "grep -r"
-```
-- Jump automatically if there is one match or two matches (and cursor is already on one of those matches)
-```
-let g:gitgrep_auto_jump = 1
 ```
 - Exclude files using Vim's regex
 ```

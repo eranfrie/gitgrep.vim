@@ -1,5 +1,5 @@
 " Vim global plugin for using git grep
-" Last Change:  2023 Aug 11
+" Last Change:  2023 Dec 23
 " Maintainer:   Eran Friedman
 " License:      This file is placed in the public domain.
 
@@ -22,24 +22,28 @@ let s:iter_index = 0
 
 
 " Execute the grep command.
-" Also contains the auto-jump logic.
-function s:Grep(flags, pattern)
+function s:Grep(flags, pattern) abort
   " settings
   let l:gitgrep_cmd = get(g:, 'gitgrep_cmd', 'git grep')
   let l:gitgrep_exclude_files = get(g:, 'gitgrep_exclude_files', '')
-  let l:gitgrep_auto_jump = get(g:, 'gitgrep_auto_jump', 0)
 
   let l:cmd = l:gitgrep_cmd . " -n " . a:flags . " " . a:pattern
   let l:options = systemlist(l:cmd)
+  let l:prompt = l:cmd . " (0 matches)"
 
+  " pattern is empty - nothing to run
+  if empty(a:pattern)
+    return [1, [], l:prompt]
+  endif
+
+  " probably not a real error, but no match is found
   if v:shell_error == 1
-    echo "No match found"
-    return [0, v:null]
+    return [1, [], l:prompt]
   endif
 
   if v:shell_error != 0
     echo "Not a git repository"
-    return [0, v:null]
+    return [0, v:null, l:prompt]
   endif
 
   " filter files
@@ -55,41 +59,12 @@ function s:Grep(flags, pattern)
     let l:options = l:filtered_options
     " check if list is empty after filtering
     if len(l:options) == 0
-      echo "No match found"
-      return [0, v:null]
+      return [1, [], l:prompt]
     endif
   endif
 
-  let l:selected_line = v:null
-  let l:line_num = v:null
-  if l:gitgrep_auto_jump == 1
-    if len(l:options) == 1
-      let l:selected_line = l:options[0]
-      let l:line_num = 0
-      let l:file_and_line = s:ParseFileAndLineNo(l:selected_line)
-      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
-      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
-        echo "Already on single match"
-        return [0, v:null]
-      endif
-    elseif len(l:options) == 2
-      let l:file_and_line = s:ParseFileAndLineNo(l:options[0])
-      let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
-      if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
-        let l:selected_line = l:options[1]
-        let l:line_num = 1
-      else
-        let l:file_and_line = s:ParseFileAndLineNo(l:options[1])
-        let l:full_filename = fnamemodify(l:file_and_line[0], ':p')
-        if l:full_filename == expand('%:p') && l:file_and_line[1] == line(".")
-          let l:selected_line = l:options[0]
-          let l:line_num = 0
-        endif
-      endif
-    endif
-  endif
   let l:prompt = l:cmd . " (" . len(l:options) . " matches)"
-  return [1, [l:options, l:selected_line, l:line_num, l:prompt]]
+  return [1, l:options, l:prompt]
 endfunction
 
 
@@ -101,32 +76,33 @@ endfunction
 
 
 function s:InteractiveMenu(flags, pattern) abort
+  let l:pattern = a:pattern
+
   " settings
   let l:gitgrep_menu_height = get(g:, 'gitgrep_menu_height', 15)
   let l:gitgrep_file_color = get(g:, 'gitgrep_file_color', "blue")
   let l:gitgrep_pattern_color = get(g:, 'gitgrep_pattern_color', "red")
 
-  let l:res = s:Grep(a:flags, a:pattern)
-  if l:res[0] == 0
-    return [0, v:null, v:null, v:null]
-  endif
-
-  let l:options = res[1][0]
-  let l:selected_line = res[1][1]
-  let l:line_num = res[1][2]
-  let l:prompt = res[1][3]
-
-  if l:selected_line != v:null
-    return [1, l:selected_line, l:line_num, l:options]
-  endif
-
   bo new +setlocal\ buftype=nofile\ bufhidden=wipe\ nofoldenable\
     \ colorcolumn=0\ nobuflisted\ number\ norelativenumber\ noswapfile\ wrap\ cursorline
 
   exe 'highlight filename_group ctermfg=' . l:gitgrep_file_color
-  exe 'highlight pattern_group ctermfg=' . l:gitgrep_pattern_color
   match filename_group /^.*:\d\+:/
-  call matchadd("pattern_group", a:pattern[1:-2]) " remove shellescape from pattern
+  exe 'highlight pattern_group ctermfg=' . l:gitgrep_pattern_color
+  " refresh coloring of the matched pattern
+  let l:pattern_to_color = l:pattern
+  if len(l:pattern) > 2 && l:pattern[0] == "'"
+    let l:pattern_to_color = l:pattern[1:-2]
+  endif
+  let l:pattern_coloring_id = matchadd("pattern_group", l:pattern_to_color)
+
+  let l:res = s:Grep(a:flags, l:pattern)
+  if l:res[0] == 0
+    return [0, v:null, v:null, v:null]
+  endif
+
+  let l:options = res[1]
+  let l:prompt = res[2]
 
   let l:cur_buf = bufnr('%')
   call setline(1, l:options)
@@ -146,14 +122,10 @@ function s:InteractiveMenu(flags, pattern) abort
       call s:CloseBuffer(l:cur_buf)
       return [0, v:null, v:null, v:null]
     elseif ch ==# 0x0D " Enter
-      let l:result = getline('.')
+      let l:selected_line = getline('.')
       let l:line_num = line('.')
       call s:CloseBuffer(l:cur_buf)
-      return [1, l:result, l:line_num - 1, l:options]
-    elseif ch ==# 0x6B " k
-      norm k
-    elseif ch ==# 0x6A " j
-      norm j
+      return [1, l:selected_line, l:line_num - 1, l:options]
     elseif ch == "\<Up>"
       norm k
     elseif ch == "\<Down>"
@@ -166,9 +138,63 @@ function s:InteractiveMenu(flags, pattern) abort
       for i in range(1, l:gitgrep_menu_height)
         norm j
       endfor
+    " update pattern
+    else
+      " Backspace
+      if ch is# "\<BS>"
+        if len(l:pattern) > 0
+          " preserve encapsulation
+          if l:pattern[0] == "'"
+            let l:pattern = l:pattern[:-2]
+            if len(l:pattern) > 1
+              let l:pattern = l:pattern[:-2]
+            endif
+            let l:pattern = l:pattern . "'"
+          else
+            let l:pattern = l:pattern[:-2]
+          endif
+        endif
+      " concatenate a character
+      else
+        " preserve encapsulation
+        if l:pattern[0] == "'"
+          let l:pattern = l:pattern[:-2]
+          let l:pattern = l:pattern . nr2char(ch)
+          let l:pattern = l:pattern . "'"
+        else
+          let l:pattern = l:pattern . nr2char(ch)
+        endif
+      endif
+
+      let l:res = s:Grep(a:flags, l:pattern)
+      " remove all lines in case there are less options than before
+      let l:lines_to_remove = len(l:options)
+      while l:lines_to_remove > 0
+        d
+        let l:lines_to_remove -=1
+      endwhile
+
+      let l:options = res[1]
+      let l:prompt = res[2]
+
+      let l:cur_buf = bufnr('%')
+      call setline(1, l:options)
+
+      " refresh coloring of the matched pattern
+      let l:pattern_to_color = l:pattern
+      if len(l:pattern) > 2 && l:pattern[0] == "'"
+        let l:pattern_to_color = l:pattern[1:-2]
+      endif
+      call matchdelete(l:pattern_coloring_id)
+      let l:pattern_coloring_id = matchadd("pattern_group", l:pattern_to_color)
+
+      exe "res " . l:gitgrep_menu_height
+
     endif
 
     redraw
+    echo l:prompt
+
   endwhile
 endfunction
 
