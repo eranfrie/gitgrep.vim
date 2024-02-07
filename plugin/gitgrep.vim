@@ -266,6 +266,10 @@ function GitGrep(flags, pattern)
 
   " process selection
   let l:splitted_line = split(l:selected_line, ":")
+  " can be <2 if the list of options is empty and Enter is pressed
+  if len(l:splitted_line) < 2
+    return
+  endif
   let l:filename = l:splitted_line[0]
   let l:line_no = l:splitted_line[1]
 
