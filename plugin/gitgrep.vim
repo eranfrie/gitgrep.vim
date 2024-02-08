@@ -123,9 +123,9 @@ function s:InteractiveMenu(flags, pattern) abort
       return [0, v:null, v:null, v:null]
     elseif ch ==# 0x0D " Enter
       let l:selected_line = getline('.')
-      let l:line_num = line('.')
+      let l:selection_index = line('.')
       call s:CloseBuffer(l:cur_buf)
-      return [1, l:selected_line, l:line_num - 1, l:options]
+      return [1, l:selected_line, l:selection_index - 1, l:options]
     elseif ch == "\<Up>"
       norm k
     elseif ch == "\<Down>"
@@ -254,12 +254,12 @@ function GitGrep(flags, pattern)
   endif
 
   let l:selected_line = res[1]
-  let l:line_num = res[2]
+  let l:selection_index = res[2]
   let l:options = res[3]
 
   " store information to allow iteration
   let s:iter_matches = l:options
-  let s:iter_index = l:line_num
+  let s:iter_index = l:selection_index
 
   " store previous location to allow jumping back
   call add(s:prev_locations, [line("."), expand('%:p')])
